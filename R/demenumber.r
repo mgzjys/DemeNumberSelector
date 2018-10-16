@@ -15,6 +15,8 @@ Edgelength = function(Gene_diff, Sample_location,Automode) {
   # Loading reqiured library
   library(densityClust)
   library(rgeos)
+  library(spatstat.utils)
+  library(geosphere)
   
   # density clustering based on genetic distance data
   Gene_dist <- as.dist(Gene_diff)
@@ -43,8 +45,7 @@ Edgelength = function(Gene_diff, Sample_location,Automode) {
   clustercenters <- list()
   
  
-  library(spatstat.utils)
-  library(geosphere)
+  
   
   for (i in 1:Nclusters)
   {
