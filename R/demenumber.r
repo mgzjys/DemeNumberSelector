@@ -40,7 +40,7 @@ Edgelength = function(Gene_diff, Sample_location,Automode) {
   # calculate the spatail mean for each cluster
   Nclusters <-
     length(Gene_Clust$clusters[!duplicated(Gene_Clust$clusters)])
-  ClusterID_Coord <- cbind(rehalo, Sample_location)
+  ClusterID_Coord <- cbind(clusters, Sample_location)
   colnames(ClusterID_Coord) <- c("clusterID", "lon", "lat")
   clustercenters <- list()
   
@@ -54,6 +54,7 @@ Edgelength = function(Gene_diff, Sample_location,Automode) {
       cbind(mean(cluster.member$lon), mean(cluster.member$lat))
     clustercenters <- rbind(clustercenters, cluster.center)
   }
+  na.omit(clustercenters) ->clustercenters
   clustercenters<-matrix(as.numeric(clustercenters),ncol=2)
   clustercenters<-SpatialPoints(cbind(clustercenters[,1], clustercenters[,2]),CRS("+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs"))
   # Calculated the maximum edege length for each triangle side
