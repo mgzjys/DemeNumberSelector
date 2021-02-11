@@ -1,7 +1,7 @@
 #' This function allows you to calculate the maximum edge length for each triangle side
 #' Edgelength()
 #' @param Gene_diff genetic distance file (.diffs)
-#' @param Sample_location genetic distance file (.diffs)
+#' @param Sample_location sample coordinates file (.coord)
 #' @param Automode parameter to determine whether to use the defualt settings of density clustering, TRUE or FALSE
 #' @keywords Edgelength
 #' @export
@@ -11,13 +11,13 @@ Edgelength = function(Gene_diff, Sample_location,Automode) {
   # Loading genetic distance data
   Gene_diff <- read.table(Gene_diff, header = FALSE)
   Sample_location<-read.table(Sample_location,header = FALSE)
-  
+
   # Loading reqiured library
   library(densityClust)
   library(rgeos)
   library(spatstat.utils)
   library(geosphere)
-  
+
   # density clustering based on genetic distance data
   Gene_dist <- as.dist(Gene_diff)
   Gene_Clust <- densityClust(Gene_dist, gaussian = TRUE)
@@ -29,24 +29,24 @@ Edgelength = function(Gene_diff, Sample_location,Automode) {
       plot = TRUE
     )
   rehalo <- clusters(Gene_Clust, as.list = FALSE, halo.rm = TRUE)
-  
+
   # add reference line
   abline(v = max(Gene_Clust$rho) / 2)
   abline(h = max(Gene_Clust$delta) / 2)
-  
+
   # plotting the clustering result
   plotMDS(Gene_Clust)
-  
+
   # calculate the spatail mean for each cluster
   Nclusters <-
     length(Gene_Clust$clusters[!duplicated(Gene_Clust$clusters)])
-  ClusterID_Coord <- cbind(clusters, Sample_location)
+  ClusterID_Coord <- cbind(Gene_Clust$clusters, Sample_location)
   colnames(ClusterID_Coord) <- c("clusterID", "lon", "lat")
   clustercenters <- list()
-  
- 
-  
-  
+
+
+
+
   for (i in 1:Nclusters)
   {
     cluster.member <- ClusterID_Coord[ClusterID_Coord$clusterID == i,]
@@ -62,7 +62,7 @@ Edgelength = function(Gene_diff, Sample_location,Automode) {
     min(distm(clustercenters)[distm(clustercenters) > 0])
   return(max_edge_length)
   #max_edge_length
-  
+
 }
 
 
@@ -79,7 +79,7 @@ DemeNumber=function(outlinefile, max_edge_length) {
     # Loading boundary data and sample location data
     outline <- read.table(outlinefile, header = F)
     colnames(outline) <- c("Lon", "Lat")
-    
+
     # creating ourline polygon
     library(sp)
     library(rgeos)
@@ -88,37 +88,37 @@ DemeNumber=function(outlinefile, max_edge_length) {
         Polygon(cbind(outline$Lon, outline$Lat))
       ), "x")))
     outline_area <- gArea(Outline_Polygon)
-    
+
     #outline_area <- areaPolygon(Outline_Polygon)
-    
-    
-    
-    
+
+
+
+
     # calculate the edge length based on triangulation method from eems
     x_span <- max(outline$Lon) - min(outline$Lon)
     y_span <- max(outline$Lat) - min(outline$Lat)
-  #  
-    
-   # x_span <- distm(c(max(outline$Lon),max(outline$Lat)),c(min(outline$Lon),max(outline$Lat)))
-   # y_span <- distm(c(max(outline$Lon),max(outline$Lat)),c(max(outline$Lon),min(outline$Lat)))
-    
-    
+    #
+
+    # x_span <- distm(c(max(outline$Lon),max(outline$Lat)),c(min(outline$Lon),max(outline$Lat)))
+    # y_span <- distm(c(max(outline$Lon),max(outline$Lat)),c(max(outline$Lon),min(outline$Lat)))
+
+
     xDemes <- as.integer(sqrt(x * x_span * x_span / outline_area))
     yDemes <- as.integer(sqrt(x * y_span * y_span / outline_area))
-    
-    
+
+
     scalex <- x_span / (xDemes - 0.5)
     scaley <- y_span / (yDemes - 1.0)
-    
+
     edge1 <- distm(cbind(max(outline$Lon),min(abs(outline$Lat))+yDemes*scaley),cbind(max(outline$Lon)-(scalex/2),min(abs(outline$Lat))+(yDemes-1)*scaley))
     edge2 <- distm(cbind(max(outline$Lon),min(abs(outline$Lat))+yDemes*scaley),cbind(max(outline$Lon)-(scalex/2),min(abs(outline$Lat))+yDemes*scaley))
-    
+
     edge1 <-as.numeric(edge1[1])
     edge2 <-as.numeric(edge2[1])
-    
+
     #edge1 <- sqrt((scalex / 2) * (scalex / 2) + scaley * scaley)
     #edge2 <- scalex
-    
+
     if (edge1 >= edge2)
     {
       return(edge1)
@@ -127,7 +127,7 @@ DemeNumber=function(outlinefile, max_edge_length) {
     {
       return(edge2)
     }
-    
+
   }
   # calculate deme number
   deme_number <-ceiling(
@@ -136,12 +136,12 @@ DemeNumber=function(outlinefile, max_edge_length) {
         edge_eems_triangle(x, outlinefile) - max_edge_length
     ),
     lower = 0,
-    upper = 1000,
+    upper = 9000,
     tol = 1e-10
     )[1]$root)
-  
+
   # plotting the result
-  
+
   edge_eems_plot<- Vectorize(edge_eems_triangle);
   suppressWarnings(curve(
     edge_eems_plot(x,outlinefile),
