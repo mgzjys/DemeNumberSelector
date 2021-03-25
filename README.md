@@ -1,6 +1,7 @@
 # DemeNumberSelector
 DemeNumberSelector
 
+```
 library(devtools)
 install_github("mgzjys/DemeNumberSelector")
 library(DemeNumberSelector)
@@ -20,3 +21,4 @@ length<-3600
 
 #calculate the deme number
 deme<-DemeNumber(Outline,length)
+```
