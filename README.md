@@ -1,7 +1,9 @@
 # DemeNumberSelector
 DemeNumberSelector
 
-```
+Instructions for use:
+
+```r
 library(devtools)
 install_github("mgzjys/DemeNumberSelector")
 library(DemeNumberSelector)
